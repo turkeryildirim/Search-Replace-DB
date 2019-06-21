@@ -3,7 +3,7 @@
 
 /**
  * To run this script, execute something like this:
- * `./srdb.cli.php -h localhost -u root -n test -s "findMe" -r "replaceMe"`
+ * `./srdb.cli.php -h localhost -u root -p test -s "findMe" -r "replaceMe"`
  * use the --dry-run flag to do a dry run without searching/replacing.
  */
 
@@ -203,7 +203,6 @@ foreach ($options as $key => $value) {
 }
 
 // modify the log output
-<<<<<<< HEAD
 class icit_srdb_cli extends icit_srdb
 {
     public function log($type = '')
@@ -252,35 +251,6 @@ class icit_srdb_cli extends icit_srdb
                 }
                 $dry_run_string = $this->dry_run ? "would have been" : "were";
                 $output .= "
-=======
-class icit_srdb_cli extends icit_srdb {
-
-	public function log( $type = '' ) {
-
-		$args = array_slice( func_get_args(), 1 );
-
-		$output = "";
-
-		switch( $type ) {
-			case 'error':
-				list( $error_type, $error ) = $args;
-				$output .= "$error_type: $error";
-				break;
-			case 'search_replace_table_start':
-				list( $table, $search, $replace ) = $args;
-				$output .= "{$table}: replacing {$search} with {$replace}";
-				break;
-			case 'search_replace_table_end':
-				list( $table, $report ) = $args;
-				$time = number_format( $report[ 'end' ] - $report[ 'start' ], 8 );
-				$output .= "{$table}: {$report['rows']} rows, {$report['change']} changes found, {$report['updates']} updates made in {$time} seconds";
-				break;
-			case 'search_replace_end':
-				list( $search, $replace, $report ) = $args;
-				$time = number_format( $report[ 'end' ] - $report[ 'start' ], 8 );
-				$dry_run_string = $this->dry_run ? "would have been" : "were";
-				$output .= "
->>>>>>> b45b3b86cb4680559821f464a52d9130cb9f3c5f
 Replacing {$search} with {$replace} on {$report['tables']} tables with {$report['rows']} rows
 {$report['change']} changes {$dry_run_string} made
 {$report['updates']} updates were actually made
