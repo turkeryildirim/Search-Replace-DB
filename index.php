@@ -55,13 +55,23 @@
  *		* Comprehensive check to prevent accidental deletion of web projects
  *		* Removed mysql functions and replaced with mysqli
  *
- * Version 3.0:
+ * Version 3.0.0:
  * 		* Major overhaul
  * 		* Multibyte string replacements
+ * 		* UI completely redesigned
+ * 		* Removed all links from script until 'delete' has been clicked to avoid
+ * 		  security risk from our access logs
+ * 		* Search replace functionality moved to it's own separate class
+ * 		* Replacements done table by table to avoid timeouts
  * 		* Convert tables to InnoDB
  * 		* Convert tables to utf8_unicode_ci
- * 		* Preview/view changes in report
+ * 		* Use PDO if available
+ * 		* Preview/view changes
  * 		* Optionally use preg_replace()
+ * 		* Scripts bootstraps WordPress/Drupal to avoid issues with unknown
+ * 		  serialised objects/classes
+ * 		* Added marketing stuff to deleted screen (sorry but we're running a
+ * 		  business!)
  * 		* Better error/exception handling & reporting
  * 		* Reports per table
  * 		* Exclude/include multiple columns
@@ -110,6 +120,12 @@
  *            and seems to work in all cases.
  *
  */
+
+// always good here
+header( 'HTTP/1.1 200 OK' );
+header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1.
+header('Pragma: no-cache'); // HTTP 1.0.
+header('Expires: 0'); // Proxies.
 
 require_once(realpath(dirname(__FILE__)) . '/srdb.class.php');
 

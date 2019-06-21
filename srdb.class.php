@@ -294,6 +294,8 @@ class icit_srdb {
 		// normalised to utf-8 internally and output in the appropriate charset.
 		mb_regex_encoding( 'UTF-8' );
 
+		ini_set('unserialize_callback_func', 'object_serializer' );
+
 		// allow a string for columns
 		foreach( array( 'exclude_cols', 'include_cols', 'tables' , 'exclude_tables') as $maybe_string_arg ) {
 			if ( is_string( $args[ $maybe_string_arg ] ) )
@@ -778,7 +780,7 @@ class icit_srdb {
 			}
 
 			// Submitted by Tina Matter
-			elseif ( is_object( $data ) ) {
+			elseif ( is_object( $data ) && ! is_a( $data, '__PHP_Incomplete_Class' ) ) {
 				// $data_class = get_class( $data );
 				$_tmp = $data; // new $data_class( );
 				$props = get_object_vars( $data );
@@ -801,9 +803,7 @@ class icit_srdb {
 				return serialize( $data );
 
 		} catch( Exception $error ) {
-
-			$this->add_error( $error->getMessage(), 'results' );
-
+		    $this->add_error( $error->getMessage().':: This is usually caused by a plugin storing classes as a serialised string which other PHP classes can\'t then access. It is not possible to unserialise this data because the PHP can\'t access this class. P.S. It\'s most commonly a Yoast plugin that causes this error.', 'results' );
 		}
 
 		return $data;
@@ -850,8 +850,8 @@ class icit_srdb {
 						 'rows' => 0,
 						 'change' => 0,
 						 'updates' => 0,
-						 'start' => microtime( ),
-						 'end' => microtime( ),
+						 'start' => microtime(true),
+						 'end' => microtime(true),
 						 'errors' => array( ),
 						 'table_reports' => array( )
 						 );
@@ -861,8 +861,8 @@ class icit_srdb {
 						 'change' => 0,
 						 'changes' => array( ),
 						 'updates' => 0,
-						 'start' => microtime( ),
-						 'end' => microtime( ),
+						 'start' => microtime(true),
+						 'end' => microtime(true),
 						 'errors' => array( ),
 						 );
 
@@ -893,7 +893,7 @@ class icit_srdb {
 					case 'utf32':
 						//$encoding = 'utf8';
 						$this->add_error( "The table \"{$table}\" is encoded using \"{$encoding}\" which is currently unsupported.", 'results' );
-						continue;
+						continue 2;
 						break;
 
 					default:
@@ -914,7 +914,7 @@ class icit_srdb {
 
 				// create new table report instance
 				$new_table_report = $table_report;
-				$new_table_report[ 'start' ] = microtime();
+				$new_table_report[ 'start' ] = microtime(true);
 
 				$this->log( 'search_replace_table_start', $table, $search, $replace );
 
@@ -947,7 +947,7 @@ class icit_srdb {
 
 						foreach( $columns as $column ) {
 
-							$edited_data = $data_to_fix = $row[ $column ];
+                            $edited_data = $data_to_fix = $row[ $column ];
 
 							if ( in_array( $column, $primary_key ) ) {
 								$where_sql[] = "`{$column}` = " . $this->db_escape( $data_to_fix );
@@ -1014,7 +1014,7 @@ class icit_srdb {
 
 				}
 
-				$new_table_report[ 'end' ] = microtime();
+				$new_table_report[ 'end' ] = microtime(true);
 
 				// store table report in main
 				$report[ 'table_reports' ][ $table ] = $new_table_report;
@@ -1025,7 +1025,7 @@ class icit_srdb {
 
 		}
 
-		$report[ 'end' ] = microtime( );
+		$report[ 'end' ] = microtime(true);
 
 		$this->log( 'search_replace_end', $search, $replace, $report );
 
@@ -1249,4 +1249,17 @@ class icit_srdb {
 		return $string;
 	}
 
+
+}
+
+
+/**
+ * .. make classes
+ *
+ * @param string $class_name
+ *
+ * @return void
+ */
+function object_serializer( $class_name ) {
+    eval("class {$class_name} extends ArrayObject {}");
 }
