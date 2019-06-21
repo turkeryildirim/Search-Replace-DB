@@ -764,7 +764,7 @@ class icit_srdb {
 
 		// some unserialised data cannot be re-serialised eg. SimpleXMLElements
 		try {
-
+		  $json_serialized = FALSE;
 			if ( is_string( $data ) && ( $unserialized = @unserialize( $data ) ) !== false ) {
 				$data = $this->recursive_unserialize_replace( $from, $to, $unserialized, true );
 			}
@@ -794,13 +794,25 @@ class icit_srdb {
 
 			else {
 				if ( is_string( $data ) ) {
-					$data = $this->str_replace( $from, $to, $data );
-
-				}
+				  // Check for possible json/base64 encoding
+				  if(function_exists('json_decode')) {
+					  $retval = json_decode(base64_decode($data), TRUE);
+					  if($retval != NULL) { // If decoded successfully
+					    $json_serialized = TRUE;
+					    $data = $this->recursive_unserialize_replace( $from, $to, $retval);
+					  }
+				  }
+				  if(!$json_serialized) {
+	  				$data = $this->str_replace( $from, $to, $data );
+  				}
+			  }
 			}
 
 			if ( $serialised )
 				return serialize( $data );
+			elseif ($json_serialized) {
+			  return base64_encode(json_encode($data));
+			}
 
 		} catch( Exception $error ) {
 		    $this->add_error( $error->getMessage().':: This is usually caused by a plugin storing classes as a serialised string which other PHP classes can\'t then access. It is not possible to unserialise this data because the PHP can\'t access this class. P.S. It\'s most commonly a Yoast plugin that causes this error.', 'results' );
