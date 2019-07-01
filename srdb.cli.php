@@ -148,7 +148,7 @@ if (version_compare(PHP_VERSION, '5.2') < 0) {
 
 if (!extension_loaded("mbstring")) {
     fwrite(STDERR, "This script requires mbstring. Please install mbstring and try again.\n");
-    exit (1);
+    exit(1);
 }
 
 // check required args are passed
@@ -175,10 +175,10 @@ $args = array(
 
 // create $args array
 foreach ($options as $key => $value) {
-
     // transpose keys
-    if (($is_short = array_search($key, $short_opts_normal)) !== false)
+    if (($is_short = array_search($key, $short_opts_normal)) !== false) {
         $key = $long_opts_normal[$is_short];
+    }
 
     if (in_array($key, ['search', 'replace']) && is_array($jsonVal = json_decode($value, true))) {
         $args[$key] = $jsonVal;
@@ -186,8 +186,9 @@ foreach ($options as $key => $value) {
     }
 
     // boolean options as is, eg. a no value arg should be set true
-    if (in_array($key, $long_opts))
+    if (in_array($key, $long_opts)) {
         $value = true;
+    }
 
     switch ($key) {
         // boolean options.
@@ -232,7 +233,7 @@ class icit_srdb_cli extends icit_srdb
             case 'search_replace_table_end':
                 list($table, $report) = $args;
                 $time = number_format($report['end'] - $report['start'], 8);
-                if ($time < 0){
+                if ($time < 0) {
                     $time = $time * -1;
                 }
                 $output .= "{$table}: {$report['rows']} rows, {$report['change']} changes found, {$report['updates']} updates made in {$time} seconds";
@@ -246,7 +247,7 @@ class icit_srdb_cli extends icit_srdb
                     $replace = implode(' or ', $replace);
                 }
                 $time = number_format($report['end'] - $report['start'], 8);
-                if ($time < 0){
+                if ($time < 0) {
                     $time = $time * -1;
                 }
                 $dry_run_string = $this->dry_run ? "would have been" : "were";
@@ -266,11 +267,10 @@ It took {$time} seconds";
                 break;
         }
 
-        if ($this->verbose)
+        if ($this->verbose) {
             echo $output . "\n";
-
+        }
     }
-
 }
 
 $report = new icit_srdb_cli($args);
